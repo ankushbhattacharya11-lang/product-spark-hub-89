@@ -1,3 +1,4 @@
+import { useMemo, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -12,11 +13,12 @@ import {
   Zap,
   Activity,
   Layers,
+  Filter,
 } from "lucide-react";
 
-import cricketAuctionThumb from "@/assets/cricket-auction-pro.jpg";
-import sportsDashboardThumb from "@/assets/sports-dashboard.jpg";
-import babaChampionThumb from "@/assets/baba-champion-league.jpg";
+import { CATEGORIES, allTech, projects, type Category, type Project } from "@/data/projects";
+import { ClaudeWalkthrough } from "@/components/ClaudeWalkthrough";
+import { ContactSection } from "@/components/ContactSection";
 
 export const Route = createFileRoute("/")({
   head: () => ({
