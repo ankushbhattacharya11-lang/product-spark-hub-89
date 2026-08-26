@@ -154,11 +154,11 @@ function Projects() {
             Launches that move fast
           </h2>
           <p className="mt-4 text-muted-foreground">
-            Two product case studies built around real-time data, sports workflows, and clean UI.
+            Product case studies built around real-time data, sports workflows, and AI-driven automation.
           </p>
         </div>
 
-        <div className="grid gap-8 md:grid-cols-2">
+        <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
           <ProjectCard
             title="Cricket Auction Pro"
             description="A live cricket auction platform where franchises bid in real time. Built with Webflow and AI-assisted workflows, it blends sport admin tools with an engaging bidding experience."
@@ -174,6 +174,16 @@ function Projects() {
             image={sportsDashboardThumb}
             imageAlt="Real-Time Sports Tracking Dashboard with live pitch map, statistics charts, and player heatmaps in a dark UI"
             tags={["React", "Firebase", "Real-Time Data", "Data Viz"]}
+            cta="Read Case Study"
+            href="#"
+            liveIndicator
+          />
+          <ProjectCard
+            title="Baba Champion Premier League"
+            description="An AI-automated eFootball tournament engine powered by Claude. Structured prompts parse raw match results into fixture schedules, leaderboards, and player metrics with zero manual data entry."
+            image={babaChampionThumb}
+            imageAlt="Baba Champion Premier League tournament dashboard showing leaderboard, fixtures, and AI automation panel in a dark UI"
+            tags={["Claude AI", "Prompt Engineering", "Automation", "Tournament Ops"]}
             cta="Read Case Study"
             href="#"
             liveIndicator
