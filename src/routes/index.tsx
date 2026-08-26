@@ -16,6 +16,7 @@ import {
 
 import cricketAuctionThumb from "@/assets/cricket-auction-pro.jpg";
 import sportsDashboardThumb from "@/assets/sports-dashboard.jpg";
+import babaChampionThumb from "@/assets/baba-champion-league.jpg";
 
 export const Route = createFileRoute("/")({
   head: () => ({
