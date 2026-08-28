@@ -89,6 +89,12 @@ function Header() {
           >
             About
           </a>
+          <a
+            href="#contact"
+            className="hidden text-muted-foreground transition-colors hover:text-foreground sm:inline-block"
+          >
+            Contact
+          </a>
           <Button asChild size="sm" className="glow-primary">
             <a href="#launches">View My Launches</a>
           </Button>
@@ -286,7 +292,7 @@ function ProjectCard({ project }: { project: Project }) {
 
       <div className="flex flex-1 flex-col p-6 sm:p-8">
         <div className="mb-4 flex flex-wrap gap-2">
-          {tags.map((tag) => (
+          {tech.map((tag) => (
             <Badge key={tag} variant="secondary" className="text-xs">
               {tag}
             </Badge>
@@ -295,15 +301,15 @@ function ProjectCard({ project }: { project: Project }) {
 
         <h3 className="font-heading text-xl font-bold tracking-tight sm:text-2xl">{title}</h3>
         <p className="mt-3 flex-1 text-sm leading-relaxed text-muted-foreground sm:text-base">
-          {description}
+          {summary}
         </p>
 
         <div className="mt-6">
           <Button asChild variant="outline" className="group/btn gap-2">
-            <a href={href}>
-              {cta}
+            <Link to="/work/$slug" params={{ slug }}>
+              Read Case Study
               <ArrowRight className="transition-transform group-hover/btn:translate-x-0.5" />
-            </a>
+            </Link>
           </Button>
         </div>
       </div>
