@@ -7,10 +7,21 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Mail, Send, Sparkles, CheckCircle2 } from "lucide-react";
 
+const INTENTS = [
+  "Start a project",
+  "AI automation assessment",
+  "Real-time dashboard",
+  "Just saying hi",
+] as const;
+
+type Intent = (typeof INTENTS)[number];
+
+const DEFAULT_INTENT: Intent = "Start a project";
+
 const contactSchema = z.object({
   name: z.string().trim().nonempty("Please add your name").max(100, "Name is too long"),
   email: z.string().trim().email("Enter a valid email").max(255, "Email is too long"),
-  intent: z.string().max(80).optional(),
+  intent: z.string().max(80).default(DEFAULT_INTENT),
   message: z
     .string()
     .trim()
@@ -20,10 +31,8 @@ const contactSchema = z.object({
 
 type Errors = Partial<Record<keyof z.infer<typeof contactSchema>, string>>;
 
-const INTENTS = ["Start a project", "AI automation assessment", "Real-time dashboard", "Just saying hi"];
-
 export function ContactSection() {
-  const [intent, setIntent] = useState<string>(INTENTS[0]!);
+  const [intent, setIntent] = useState<Intent>(DEFAULT_INTENT);
   const [errors, setErrors] = useState<Errors>({});
   const [sent, setSent] = useState(false);
 
