@@ -146,6 +146,19 @@ function Hero() {
 }
 
 function Projects() {
+  const [category, setCategory] = useState<Category | "All">("All");
+  const [tech, setTech] = useState<string | "All">("All");
+
+  const filtered = useMemo(
+    () =>
+      projects.filter(
+        (p) =>
+          (category === "All" || p.category === category) &&
+          (tech === "All" || p.tech.includes(tech)),
+      ),
+    [category, tech],
+  );
+
   return (
     <section id="launches" className="scroll-mt-20 px-4 py-24 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-7xl">
@@ -162,63 +175,92 @@ function Projects() {
           </p>
         </div>
 
-        <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-          <ProjectCard
-            title="Cricket Auction Pro"
-            description="A live cricket auction platform where franchises bid in real time. Built with Webflow and AI-assisted workflows, it blends sport admin tools with an engaging bidding experience."
-            image={cricketAuctionThumb}
-            imageAlt="Cricket Auction Pro dashboard showing live player cards, bidding timer, and team budget bars in a dark UI"
-            tags={["Webflow", "AI", "Real-Time Bidding", "Dashboard"]}
-            cta="Read Case Study"
-            href="#"
-          />
-          <ProjectCard
-            title="Real-Time Sports Tracking Dashboard"
-            description="A React + Firebase dashboard that visualizes live player movement, match stats, and heatmaps as the game unfolds. Designed for coaches, analysts, and fans who need instant insight."
-            image={sportsDashboardThumb}
-            imageAlt="Real-Time Sports Tracking Dashboard with live pitch map, statistics charts, and player heatmaps in a dark UI"
-            tags={["React", "Firebase", "Real-Time Data", "Data Viz"]}
-            cta="Read Case Study"
-            href="#"
-            liveIndicator
-          />
-          <ProjectCard
-            title="Baba Champion Premier League"
-            description="An AI-automated eFootball tournament engine powered by Claude. Structured prompts parse raw match results into fixture schedules, leaderboards, and player metrics with zero manual data entry."
-            image={babaChampionThumb}
-            imageAlt="Baba Champion Premier League tournament dashboard showing leaderboard, fixtures, and AI automation panel in a dark UI"
-            tags={["Claude AI", "Prompt Engineering", "Automation", "Tournament Ops"]}
-            cta="Read Case Study"
-            href="#"
-            liveIndicator
-          />
+        <div className="mb-10 space-y-4">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="mr-1 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              <Filter className="h-3.5 w-3.5" />
+              Category
+            </span>
+            {(["All", ...CATEGORIES] as const).map((c) => (
+              <button
+                key={c}
+                type="button"
+                onClick={() => setCategory(c)}
+                aria-pressed={category === c}
+                className={`rounded-full border px-3 py-1.5 text-xs font-medium transition-colors ${
+                  category === c
+                    ? "border-primary/60 bg-primary/15 text-foreground"
+                    : "border-border bg-surface text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                {c}
+              </button>
+            ))}
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="mr-1 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              <Code2 className="h-3.5 w-3.5" />
+              Tech
+            </span>
+            {(["All", ...allTech] as const).map((t) => (
+              <button
+                key={t}
+                type="button"
+                onClick={() => setTech(t)}
+                aria-pressed={tech === t}
+                className={`rounded-full border px-3 py-1.5 text-xs font-medium transition-colors ${
+                  tech === t
+                    ? "border-primary/60 bg-primary/15 text-foreground"
+                    : "border-border bg-surface text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                {t}
+              </button>
+            ))}
+          </div>
         </div>
+
+        {filtered.length === 0 ? (
+          <p className="rounded-2xl border border-border bg-card p-10 text-center text-sm text-muted-foreground">
+            No projects match that combination — try clearing a filter.
+          </p>
+        ) : (
+          <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+            {filtered.map((project) => (
+              <ProjectCard key={project.slug} project={project} />
+            ))}
+          </div>
+        )}
       </div>
     </section>
   );
 }
 
-interface ProjectCardProps {
-  title: string;
-  description: string;
-  image: string;
-  imageAlt: string;
-  tags: string[];
-  cta: string;
-  href: string;
-  liveIndicator?: boolean;
+function WalkthroughTeaser() {
+  return (
+    <section className="px-4 py-12 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-7xl">
+        <div className="mb-10 max-w-2xl">
+          <div className="mb-3 flex items-center gap-2 text-sm font-semibold uppercase tracking-wider text-primary">
+            <Activity className="h-4 w-4" />
+            Interactive Demo
+          </div>
+          <h2 className="font-heading text-3xl font-bold tracking-tight sm:text-4xl">
+            Watch Claude parse a match report
+          </h2>
+          <p className="mt-4 text-muted-foreground">
+            Step through the exact pipeline behind the Baba Champion Premier League: raw results in,
+            fixtures, standings, and player metrics out — no manual data entry.
+          </p>
+        </div>
+        <ClaudeWalkthrough />
+      </div>
+    </section>
+  );
 }
 
-function ProjectCard({
-  title,
-  description,
-  image,
-  imageAlt,
-  tags,
-  cta,
-  href,
-  liveIndicator,
-}: ProjectCardProps) {
+function ProjectCard({ project }: { project: Project }) {
+  const { title, summary, image, imageAlt, tech, liveIndicator, slug } = project;
   return (
     <article className="group flex flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-sm transition-all duration-300 hover:border-primary/40 hover:shadow-[0_0_40px_-12px_var(--color-glow)]">
       <div className="relative aspect-[16/9] overflow-hidden bg-surface">
