@@ -23,7 +23,7 @@ type Errors = Partial<Record<keyof z.infer<typeof contactSchema>, string>>;
 const INTENTS = ["Start a project", "AI automation assessment", "Real-time dashboard", "Just saying hi"];
 
 export function ContactSection() {
-  const [intent, setIntent] = useState(INTENTS[0]);
+  const [intent, setIntent] = useState<string>(INTENTS[0]!);
   const [errors, setErrors] = useState<Errors>({});
   const [sent, setSent] = useState(false);
 
