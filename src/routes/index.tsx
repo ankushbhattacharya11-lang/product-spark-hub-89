@@ -56,7 +56,9 @@ function Index() {
       <main>
         <Hero />
         <Projects />
+        <WalkthroughTeaser />
         <About />
+        <ContactSection />
       </main>
 
       <Footer />
