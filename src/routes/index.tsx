@@ -14,11 +14,15 @@ import {
   Activity,
   Layers,
   Filter,
+  Search,
+  X,
 } from "lucide-react";
 
 import { CATEGORIES, allTech, projects, type Category, type Project } from "@/data/projects";
 import { ClaudeWalkthrough } from "@/components/ClaudeWalkthrough";
 import { ContactSection } from "@/components/ContactSection";
+import { ThemeToggle } from "@/components/ThemeToggle";
+import { Input } from "@/components/ui/input";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -51,9 +55,16 @@ function Index() {
         <div className="absolute -bottom-1/4 -right-1/4 h-[50rem] w-[50rem] rounded-full bg-live/[0.05] blur-[100px]" />
       </div>
 
+      <a
+        href="#launches"
+        className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-[60] focus:rounded-md focus:bg-primary focus:px-4 focus:py-2 focus:text-sm focus:font-medium focus:text-primary-foreground"
+      >
+        Skip to main content
+      </a>
+
       <Header />
 
-      <main>
+      <main id="main">
         <Hero />
         <Projects />
         <WalkthroughTeaser />
@@ -76,7 +87,7 @@ function Header() {
         >
           AB.
         </Link>
-        <nav className="flex items-center gap-4 text-sm font-medium">
+        <nav aria-label="Main" className="flex items-center gap-4 text-sm font-medium">
           <a
             href="#launches"
             className="hidden text-muted-foreground transition-colors hover:text-foreground sm:inline-block"
@@ -95,6 +106,7 @@ function Header() {
           >
             Contact
           </a>
+          <ThemeToggle />
           <Button asChild size="sm" className="glow-primary">
             <a href="#launches">View My Launches</a>
           </Button>
@@ -154,16 +166,28 @@ function Hero() {
 function Projects() {
   const [category, setCategory] = useState<Category | "All">("All");
   const [tech, setTech] = useState<string | "All">("All");
+  const [query, setQuery] = useState("");
 
-  const filtered = useMemo(
-    () =>
-      projects.filter(
-        (p) =>
-          (category === "All" || p.category === category) &&
-          (tech === "All" || p.tech.includes(tech)),
-      ),
-    [category, tech],
-  );
+  const filtered = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    return projects.filter((p) => {
+      if (category !== "All" && p.category !== category) return false;
+      if (tech !== "All" && !p.tech.includes(tech)) return false;
+      if (!q) return true;
+      const haystack = [p.title, p.tagline, p.summary, p.category, ...p.tech]
+        .join(" ")
+        .toLowerCase();
+      return haystack.includes(q);
+    });
+  }, [category, tech, query]);
+
+  const isFiltered = category !== "All" || tech !== "All" || query.trim() !== "";
+
+  const clearAll = () => {
+    setCategory("All");
+    setTech("All");
+    setQuery("");
+  };
 
   return (
     <section id="launches" className="scroll-mt-20 px-4 py-24 sm:px-6 lg:px-8">
@@ -182,7 +206,33 @@ function Projects() {
         </div>
 
         <div className="mb-10 space-y-4">
-          <div className="flex flex-wrap items-center gap-2">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+            <div className="relative flex-1 sm:max-w-md">
+              <label htmlFor="project-search" className="sr-only">
+                Search projects by name, tag, or technology
+              </label>
+              <Search
+                aria-hidden="true"
+                className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
+              />
+              <Input
+                id="project-search"
+                type="search"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="Search projects, tech, or keywords…"
+                className="h-11 pl-9 placeholder:text-muted-foreground"
+              />
+            </div>
+            {isFiltered && (
+              <Button type="button" variant="ghost" onClick={clearAll} className="gap-2 self-start">
+                <X className="h-4 w-4" aria-hidden="true" />
+                Clear filters
+              </Button>
+            )}
+          </div>
+
+          <div role="group" aria-label="Filter by category" className="flex flex-wrap items-center gap-2">
             <span className="mr-1 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
               <Filter className="h-3.5 w-3.5" />
               Category
@@ -203,7 +253,7 @@ function Projects() {
               </button>
             ))}
           </div>
-          <div className="flex flex-wrap items-center gap-2">
+          <div role="group" aria-label="Filter by technology" className="flex flex-wrap items-center gap-2">
             <span className="mr-1 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
               <Code2 className="h-3.5 w-3.5" />
               Tech
@@ -226,9 +276,13 @@ function Projects() {
           </div>
         </div>
 
+        <p aria-live="polite" className="mb-6 text-sm text-muted-foreground">
+          Showing {filtered.length} of {projects.length} projects
+        </p>
+
         {filtered.length === 0 ? (
           <p className="rounded-2xl border border-border bg-card p-10 text-center text-sm text-muted-foreground">
-            No projects match that combination — try clearing a filter.
+            No projects match that combination — try clearing a filter or search term.
           </p>
         ) : (
           <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">

@@ -4,6 +4,9 @@ import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, ArrowRight, Target, Compass, Workflow, TrendingUp, Layers } from "lucide-react";
 import { getProject, projects } from "@/data/projects";
 import { ClaudeWalkthrough } from "@/components/ClaudeWalkthrough";
+import { ThemeToggle } from "@/components/ThemeToggle";
+
+const SITE_URL = "https://product-spark-hub-89.lovable.app";
 
 export const Route = createFileRoute("/work/$slug")({
   loader: ({ params }) => {
@@ -11,7 +14,8 @@ export const Route = createFileRoute("/work/$slug")({
     if (!project) throw notFound();
     return { project };
   },
-  head: ({ loaderData }) => {
+  head: ({ params, loaderData }) => {
+    const url = `${SITE_URL}/work/${params.slug}`;
     if (!loaderData) {
       return {
         meta: [{ title: "Case study not found" }, { name: "robots", content: "noindex" }],
@@ -24,16 +28,37 @@ export const Route = createFileRoute("/work/$slug")({
       meta: [
         { title },
         { name: "description", content: description },
+        { name: "keywords", content: project.tech.join(", ") },
         { property: "og:title", content: title },
         { property: "og:description", content: description },
         { property: "og:type", content: "article" },
+        { property: "og:site_name", content: "Ankush Bhattacharya" },
+        { property: "og:url", content: url },
         { name: "twitter:card", content: "summary_large_image" },
+        { name: "twitter:title", content: title },
+        { name: "twitter:description", content: description },
+      ],
+      links: [{ rel: "canonical", href: url }],
+      scripts: [
+        {
+          type: "application/ld+json",
+          children: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "Article",
+            headline: title,
+            description,
+            url,
+            articleSection: project.category,
+            keywords: project.tech.join(", "),
+            author: { "@type": "Person", name: "Ankush Bhattacharya" },
+          }),
+        },
       ],
     };
   },
   component: CaseStudy,
   notFoundComponent: () => (
-    <div className="flex min-h-screen items-center justify-center px-4 text-center">
+    <div className="flex min-h-dvh items-center justify-center px-4 text-center">
       <div>
         <h1 className="font-heading text-2xl font-bold">Case study not found</h1>
         <p className="mt-2 text-sm text-muted-foreground">
@@ -52,10 +77,17 @@ function CaseStudy() {
   const others = projects.filter((p) => p.slug !== project.slug);
 
   return (
-    <div className="relative min-h-screen overflow-x-hidden bg-background text-foreground">
+    <div className="relative min-h-dvh overflow-x-hidden bg-background text-foreground">
       <div className="pointer-events-none fixed inset-0 -z-10">
         <div className="absolute -left-1/4 -top-1/4 h-[60rem] w-[60rem] rounded-full bg-primary/[0.06] blur-[120px]" />
       </div>
+
+      <a
+        href="#case-study"
+        className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-[60] focus:rounded-md focus:bg-primary focus:px-4 focus:py-2 focus:text-sm focus:font-medium focus:text-primary-foreground"
+      >
+        Skip to case study content
+      </a>
 
       <header className="sticky top-0 z-50 border-b border-border/50 bg-background/80 backdrop-blur-md">
         <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-4 sm:px-6">
@@ -63,18 +95,21 @@ function CaseStudy() {
             to="/"
             className="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
           >
-            <ArrowLeft className="h-4 w-4" />
+            <ArrowLeft className="h-4 w-4" aria-hidden="true" />
             All launches
           </Link>
-          <Button asChild size="sm" className="glow-primary">
-            <Link to="/" hash="contact">
-              Start a project
-            </Link>
-          </Button>
+          <div className="flex items-center gap-2">
+            <ThemeToggle />
+            <Button asChild size="sm" className="glow-primary">
+              <Link to="/" hash="contact">
+                Start a project
+              </Link>
+            </Button>
+          </div>
         </div>
       </header>
 
-      <main className="mx-auto max-w-5xl px-4 pb-24 pt-12 sm:px-6">
+      <main id="case-study" className="mx-auto max-w-5xl px-4 pb-24 pt-12 sm:px-6">
         <Badge variant="secondary">{project.category}</Badge>
         <h1 className="mt-4 font-heading text-3xl font-bold leading-tight tracking-tight sm:text-4xl md:text-5xl">
           {project.title}
@@ -166,7 +201,7 @@ function CaseStudy() {
                 <ul className="mt-3 space-y-2 text-sm">
                   {group.items.map((item) => (
                     <li key={item} className="flex items-start gap-2">
-                      <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-primary" />
+                      <span aria-hidden="true" className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-primary" />
                       {item}
                     </li>
                   ))}
@@ -187,7 +222,7 @@ function CaseStudy() {
             <Button asChild className="gap-2 glow-primary">
               <Link to="/" hash="contact">
                 Start a project
-                <ArrowRight className="h-4 w-4" />
+                <ArrowRight className="h-4 w-4" aria-hidden="true" />
               </Link>
             </Button>
             <Button asChild variant="outline">
@@ -230,13 +265,18 @@ function Section({
   title: string;
   children: React.ReactNode;
 }) {
+  const headingId = `section-${label.toLowerCase().replace(/\s+/g, "-")}`;
   return (
-    <section className="mt-14">
+    <section aria-labelledby={headingId} className="mt-14">
       <div className="mb-3 flex items-center gap-2 text-sm font-semibold uppercase tracking-wider text-primary">
-        {icon}
+        <span aria-hidden="true" className="inline-flex">
+          {icon}
+        </span>
         {label}
       </div>
-      <h2 className="font-heading text-2xl font-bold tracking-tight sm:text-3xl">{title}</h2>
+      <h2 id={headingId} className="font-heading text-2xl font-bold tracking-tight sm:text-3xl">
+        {title}
+      </h2>
       <div className="mt-6">{children}</div>
     </section>
   );
@@ -245,7 +285,7 @@ function Section({
 function Bullet({ children }: { children: React.ReactNode }) {
   return (
     <li className="flex items-start gap-3">
-      <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-primary" />
+      <span aria-hidden="true" className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-primary" />
       <span className="text-base leading-relaxed text-muted-foreground">{children}</span>
     </li>
   );

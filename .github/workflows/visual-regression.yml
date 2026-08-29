@@ -1,0 +1,49 @@
+name: Visual regression
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  work-routes:
+    name: Screenshot /work/* case studies
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install app dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Install Playwright
+        run: |
+          pip install playwright
+          python -m playwright install --with-deps chromium
+
+      - name: Start dev server
+        run: |
+          bun run dev &
+          for i in $(seq 1 60); do
+            curl -sf -o /dev/null http://localhost:8080/ && exit 0
+            sleep 2
+          done
+          echo "dev server never became ready" >&2
+          exit 1
+
+      - name: Run case study visual checks
+        run: python3 scripts/check-work-routes.py
+
+      - name: Upload screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: work-route-screenshots
+          path: .visual-checks/
+          if-no-files-found: warn
