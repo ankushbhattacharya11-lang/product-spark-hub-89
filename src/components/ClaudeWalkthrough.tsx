@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState, type KeyboardEvent } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ArrowRight, RotateCcw, Sparkles, Check } from "lucide-react";
@@ -47,13 +47,35 @@ const STEPS = [
 export function ClaudeWalkthrough() {
   const [step, setStep] = useState(0);
   const isLast = step === STEPS.length - 1;
+  const tabRefs = useRef<(HTMLButtonElement | null)[]>([]);
+
+  const focusStep = (next: number) => {
+    const clamped = (next + STEPS.length) % STEPS.length;
+    setStep(clamped);
+    tabRefs.current[clamped]?.focus();
+  };
+
+  const onTabKeyDown = (e: KeyboardEvent<HTMLButtonElement>) => {
+    const keys: Record<string, number> = {
+      ArrowRight: step + 1,
+      ArrowDown: step + 1,
+      ArrowLeft: step - 1,
+      ArrowUp: step - 1,
+      Home: 0,
+      End: STEPS.length - 1,
+    };
+    if (e.key in keys) {
+      e.preventDefault();
+      focusStep(keys[e.key]!);
+    }
+  };
 
   return (
     <div className="rounded-2xl border border-border bg-card p-5 sm:p-8">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
           <div className="mb-2 flex items-center gap-2 text-sm font-semibold uppercase tracking-wider text-primary">
-            <Sparkles className="h-4 w-4" />
+            <Sparkles className="h-4 w-4" aria-hidden="true" />
             Interactive walkthrough
           </div>
           <h3 className="font-heading text-xl font-bold sm:text-2xl">
@@ -66,16 +88,28 @@ export function ClaudeWalkthrough() {
       </div>
 
       {/* Stepper */}
-      <ol className="mt-6 grid gap-2 sm:grid-cols-4">
+      <div
+        role="tablist"
+        aria-label="Walkthrough steps"
+        className="mt-6 grid gap-2 sm:grid-cols-4"
+      >
         {STEPS.map((s) => {
           const done = s.id < step;
           const active = s.id === step;
           return (
-            <li key={s.id}>
+            <div key={s.id}>
               <button
                 type="button"
+                role="tab"
+                id={`walkthrough-tab-${s.id}`}
+                ref={(el) => {
+                  tabRefs.current[s.id] = el;
+                }}
+                aria-selected={active}
+                aria-controls="walkthrough-panel"
+                tabIndex={active ? 0 : -1}
+                onKeyDown={onTabKeyDown}
                 onClick={() => setStep(s.id)}
-                aria-current={active ? "step" : undefined}
                 className={`w-full rounded-xl border p-3 text-left transition-colors ${
                   active
                     ? "border-primary/60 bg-primary/10"
@@ -90,19 +124,26 @@ export function ClaudeWalkthrough() {
                         : "bg-muted text-muted-foreground"
                     }`}
                   >
-                    {done ? <Check className="h-3 w-3" /> : s.id + 1}
+                    {done ? <Check className="h-3 w-3" aria-hidden="true" /> : s.id + 1}
                   </span>
                   {s.name}
                 </span>
                 <span className="mt-1 block text-xs text-muted-foreground">{s.hint}</span>
               </button>
-            </li>
+            </div>
           );
         })}
-      </ol>
+      </div>
 
       {/* Panel */}
-      <div className="mt-6 rounded-xl border border-border bg-surface p-4 sm:p-6">
+      <div
+        id="walkthrough-panel"
+        role="tabpanel"
+        tabIndex={0}
+        aria-labelledby={`walkthrough-tab-${step}`}
+        aria-live="polite"
+        className="mt-6 rounded-xl border border-border bg-surface p-4 sm:p-6"
+      >
         {step === 0 && (
           <pre className="overflow-x-auto whitespace-pre-wrap font-mono text-xs leading-relaxed text-muted-foreground sm:text-sm">
             {RAW_INPUT}
@@ -167,14 +208,14 @@ export function ClaudeWalkthrough() {
         >
           {isLast ? "Replay walkthrough" : "Run next step"}
           {isLast ? (
-            <RotateCcw className="h-4 w-4" />
+            <RotateCcw className="h-4 w-4" aria-hidden="true" />
           ) : (
             <ArrowRight className="transition-transform group-hover:translate-x-0.5" />
           )}
         </Button>
         {step > 0 && (
           <Button variant="outline" onClick={() => setStep(0)} className="gap-2">
-            <RotateCcw className="h-4 w-4" />
+            <RotateCcw className="h-4 w-4" aria-hidden="true" />
             Reset
           </Button>
         )}
