@@ -232,7 +232,7 @@ function Projects() {
             )}
           </div>
 
-          <div className="flex flex-wrap items-center gap-2">
+          <div role="group" aria-label="Filter by category" className="flex flex-wrap items-center gap-2">
             <span className="mr-1 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
               <Filter className="h-3.5 w-3.5" />
               Category
@@ -253,7 +253,7 @@ function Projects() {
               </button>
             ))}
           </div>
-          <div className="flex flex-wrap items-center gap-2">
+          <div role="group" aria-label="Filter by technology" className="flex flex-wrap items-center gap-2">
             <span className="mr-1 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
               <Code2 className="h-3.5 w-3.5" />
               Tech
