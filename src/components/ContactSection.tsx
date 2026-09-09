@@ -94,7 +94,7 @@ export function ContactSection() {
 
             <div className="mt-8">
               <Button asChild variant="outline" className="gap-2">
-                <a href="mailto:hello@example.com">
+                <a href="mailto:ankushbhattacharya11@gmail.com">
                   <Mail className="h-4 w-4" />
                   Email directly
                 </a>
