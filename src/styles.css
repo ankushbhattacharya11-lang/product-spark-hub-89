@@ -103,8 +103,10 @@
   --surface: oklch(0.965 0.008 264);
   --surface-elevated: oklch(1 0 0);
   --glow: oklch(0.52 0.19 253 / 0.28);
-  --live: oklch(0.55 0.16 150);
-  --live-glow: oklch(0.55 0.16 150 / 0.32);
+  /* Light mode: darkened so small text/badges clear WCAG AA on paper surfaces */
+  --live: oklch(0.44 0.12 152);
+  --live-glow: oklch(0.44 0.12 152 / 0.32);
+
 
   --chart-1: oklch(0.52 0.19 253);
   --chart-2: oklch(0.55 0.16 150);
