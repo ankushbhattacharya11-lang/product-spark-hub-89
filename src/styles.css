@@ -85,19 +85,19 @@
   --card-foreground: oklch(0.21 0.02 264);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.21 0.02 264);
-  --primary: oklch(0.52 0.19 253);
+  --primary: oklch(0.47 0.18 253);
   --primary-foreground: oklch(0.99 0.005 264);
   --secondary: oklch(0.94 0.012 264);
   --secondary-foreground: oklch(0.28 0.02 264);
   --muted: oklch(0.94 0.012 264);
   --muted-foreground: oklch(0.46 0.025 264);
-  --accent: oklch(0.52 0.19 253);
+  --accent: oklch(0.47 0.18 253);
   --accent-foreground: oklch(0.99 0.005 264);
   --destructive: oklch(0.55 0.22 25);
   --destructive-foreground: oklch(0.99 0.005 264);
   --border: oklch(0.89 0.012 264);
   --input: oklch(0.89 0.012 264);
-  --ring: oklch(0.52 0.19 253);
+  --ring: oklch(0.47 0.18 253);
 
   /* Extended portfolio tokens */
   --surface: oklch(0.965 0.008 264);
