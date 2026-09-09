@@ -31,3 +31,6 @@ dist-ssr
 *.sln
 *.sw?
 \n.visual-checks/
+
+.a11y-reports/
+.visual-checks/
