@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { z } from "zod";
+import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -41,8 +42,10 @@ export function ContactSection() {
   const [intent, setIntent] = useState<Intent>(DEFAULT_INTENT);
   const [errors, setErrors] = useState<Errors>({});
   const [sent, setSent] = useState(false);
+  const [sending, setSending] = useState(false);
+  const [sendError, setSendError] = useState<string | null>(null);
 
-  function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const form = new FormData(e.currentTarget);
     const result = contactSchema.safeParse({
@@ -63,6 +66,14 @@ export function ContactSection() {
     }
 
     setErrors({});
+    setSending(true);
+    setSendError(null);
+    const { error } = await supabase.from("contact_messages").insert(result.data);
+    setSending(false);
+    if (error) {
+      setSendError("Couldn't send right now — please try again or email directly.");
+      return;
+    }
     setSent(true);
   }
 
@@ -140,9 +151,9 @@ export function ContactSection() {
               <div className="flex h-full flex-col items-start justify-center gap-4">
                 <Badge className="gap-1.5">
                   <CheckCircle2 className="h-3.5 w-3.5" />
-                  Message ready
+                  Request sent
                 </Badge>
-                <h3 className="font-heading text-xl font-bold">Thanks — that's captured.</h3>
+                <h3 className="font-heading text-xl font-bold">Thanks — your request was received.</h3>
                 <p className="text-sm text-muted-foreground">
                   I'll review your {intent.toLowerCase()} request and reply within two business days.
                 </p>
