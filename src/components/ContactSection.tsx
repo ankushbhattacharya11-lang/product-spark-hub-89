@@ -214,8 +214,13 @@ export function ContactSection() {
                   {errors.message && <p className="text-xs text-destructive">{errors.message}</p>}
                 </div>
 
-                <Button type="submit" size="lg" className="w-full gap-2 glow-primary">
-                  Send request
+                {sendError && (
+                  <p role="alert" className="text-sm text-destructive">
+                    {sendError}
+                  </p>
+                )}
+                <Button type="submit" size="lg" disabled={sending} className="w-full gap-2 glow-primary">
+                  {sending ? "Sending…" : "Send request"}
                   <Send className="h-4 w-4" />
                 </Button>
               </form>
