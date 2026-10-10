@@ -14,6 +14,7 @@ import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as LeagueRouteImport } from './routes/league'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
+import { Route as ProcessBabaChampionLeagueRouteImport } from './routes/process.baba-champion-league'
 import { Route as WorkSlugRouteImport } from './routes/work.$slug'
 
 const IndexRoute = IndexRouteImport.update({
@@ -40,6 +41,12 @@ const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
   path: '/admin',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const ProcessBabaChampionLeagueRoute =
+  ProcessBabaChampionLeagueRouteImport.update({
+    id: '/process/baba-champion-league',
+    path: '/process/baba-champion-league',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const WorkSlugRoute = WorkSlugRouteImport.update({
   id: '/work/$slug',
   path: '/work/$slug',
@@ -51,6 +58,7 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/league': typeof LeagueRoute
   '/admin': typeof AuthenticatedAdminRoute
+  '/process/baba-champion-league': typeof ProcessBabaChampionLeagueRoute
   '/work/$slug': typeof WorkSlugRoute
 }
 export interface FileRoutesByTo {
@@ -58,6 +66,7 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/league': typeof LeagueRoute
   '/admin': typeof AuthenticatedAdminRoute
+  '/process/baba-champion-league': typeof ProcessBabaChampionLeagueRoute
   '/work/$slug': typeof WorkSlugRoute
 }
 export interface FileRoutesById {
@@ -67,13 +76,26 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/league': typeof LeagueRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
+  '/process/baba-champion-league': typeof ProcessBabaChampionLeagueRoute
   '/work/$slug': typeof WorkSlugRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/auth' | '/league' | '/admin' | '/work/$slug'
+  fullPaths:
+    | '/'
+    | '/auth'
+    | '/league'
+    | '/admin'
+    | '/process/baba-champion-league'
+    | '/work/$slug'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth' | '/league' | '/admin' | '/work/$slug'
+  to:
+    | '/'
+    | '/auth'
+    | '/league'
+    | '/admin'
+    | '/process/baba-champion-league'
+    | '/work/$slug'
   id:
     | '__root__'
     | '/'
@@ -81,6 +103,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/league'
     | '/_authenticated/admin'
+    | '/process/baba-champion-league'
     | '/work/$slug'
   fileRoutesById: FileRoutesById
 }
@@ -89,6 +112,7 @@ export interface RootRouteChildren {
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
   LeagueRoute: typeof LeagueRoute
+  ProcessBabaChampionLeagueRoute: typeof ProcessBabaChampionLeagueRoute
   WorkSlugRoute: typeof WorkSlugRoute
 }
 
@@ -129,6 +153,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/process/baba-champion-league': {
+      id: '/process/baba-champion-league'
+      path: '/process/baba-champion-league'
+      fullPath: '/process/baba-champion-league'
+      preLoaderRoute: typeof ProcessBabaChampionLeagueRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/work/$slug': {
       id: '/work/$slug'
       path: '/work/$slug'
@@ -155,6 +186,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
   LeagueRoute: LeagueRoute,
+  ProcessBabaChampionLeagueRoute: ProcessBabaChampionLeagueRoute,
   WorkSlugRoute: WorkSlugRoute,
 }
 export const routeTree = rootRouteImport
