@@ -27,67 +27,88 @@ export const parseAndSaveResult = createServerFn({ method: "POST" })
     if (!apiKey) return { ok: false as const, error: "AI is not configured." };
 
     const roster = players.map((p) => `${p.name} (plays as ${p.club})`).join(", ");
-    const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    const schema = {
+      type: "object",
+      additionalProperties: false,
+      properties: {
+        home_player: { type: "string" },
+        away_player: { type: "string" },
+        home_goals: { type: "integer" },
+        away_goals: { type: "integer" },
+        scorers: {
+          type: "array",
+          items: {
+            type: "object",
+            additionalProperties: false,
+            properties: {
+              player: { type: "string" },
+              side: { type: "string", enum: ["home", "away"] },
+              goals: { type: "integer" },
+            },
+            required: ["player", "side", "goals"],
+          },
+        },
+      },
+      required: ["home_player", "away_player", "home_goals", "away_goals", "scorers"],
+    };
+
+    const res = await fetch("https://ai.gateway.lovable.dev/v1/responses", {
       method: "POST",
-      headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
+      headers: {
+        "Lovable-API-Key": apiKey,
+        "Content-Type": "application/json",
+        "X-Lovable-AIG-SDK": "fetch",
+      },
       body: JSON.stringify({
-        model: "google/gemini-3-flash-preview",
-        messages: [
+        model: "openai/gpt-6-astra",
+        stream: true,
+        store: false,
+        reasoning: { effort: "low" },
+        input: [
           {
             role: "system",
-            content: `You are the Baba Champion Premier League tournament engine. Parse an eFootball match report into a strict record. League players: ${roster}. home_player/away_player MUST be exactly one of the player names (map club names to their player). The first-mentioned player is home unless stated. Scorers are in-game footballers; omit if not mentioned. Scorer goals per side must not exceed that side's score.`,
+            content: `You are the Baba Champion Premier League tournament engine. Parse an eFootball match report into a strict record. League players: ${roster}. home_player/away_player MUST be exactly one of the player names (map club names to their player). The first-mentioned player is home unless stated. Scorers are in-game footballers; use an empty list if none are mentioned. Scorer goals per side must not exceed that side's score.`,
           },
           { role: "user", content: data.report },
         ],
-        tools: [
-          {
-            type: "function",
-            function: {
-              name: "record_result",
-              description: "Record a parsed match result",
-              parameters: {
-                type: "object",
-                properties: {
-                  home_player: { type: "string" },
-                  away_player: { type: "string" },
-                  home_goals: { type: "integer" },
-                  away_goals: { type: "integer" },
-                  scorers: {
-                    type: "array",
-                    items: {
-                      type: "object",
-                      properties: {
-                        player: { type: "string" },
-                        side: { type: "string", enum: ["home", "away"] },
-                        goals: { type: "integer" },
-                      },
-                      required: ["player", "side", "goals"],
-                    },
-                  },
-                },
-                required: ["home_player", "away_player", "home_goals", "away_goals", "scorers"],
-              },
-            },
-          },
-        ],
-        tool_choice: { type: "function", function: { name: "record_result" } },
+        text: { format: { type: "json_schema", name: "match_result", strict: true, schema } },
       }),
     });
 
     if (res.status === 429) return { ok: false as const, error: "Too many requests — try again in a minute." };
     if (res.status === 402) return { ok: false as const, error: "AI credits are used up for this workspace." };
-    if (!res.ok) {
+    if (!res.ok || !res.body) {
       console.error("AI gateway error", res.status, await res.text());
       return { ok: false as const, error: "The AI couldn't read that report." };
     }
 
-    const json = (await res.json()) as {
-      choices?: { message?: { tool_calls?: { function?: { arguments?: string } }[] } }[];
-    };
-    const args = json.choices?.[0]?.message?.tool_calls?.[0]?.function?.arguments;
+    // Consume the SSE stream and accumulate the output text.
+    let out = "";
+    const reader = res.body.getReader();
+    const decoder = new TextDecoder();
+    let buf = "";
+    for (;;) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      buf += decoder.decode(value, { stream: true });
+      const lines = buf.split("\n");
+      buf = lines.pop() ?? "";
+      for (const line of lines) {
+        if (!line.startsWith("data:")) continue;
+        const payload = line.slice(5).trim();
+        if (!payload || payload === "[DONE]") continue;
+        try {
+          const ev = JSON.parse(payload) as { type?: string; delta?: string };
+          if (ev.type === "response.output_text.delta" && ev.delta) out += ev.delta;
+        } catch {
+          /* ignore partial */
+        }
+      }
+    }
+
     let parsed: z.infer<typeof ResultSchema>;
     try {
-      parsed = ResultSchema.parse(JSON.parse(args ?? "{}"));
+      parsed = ResultSchema.parse(JSON.parse(out || "{}"));
     } catch {
       return { ok: false as const, error: "The AI response didn't match the result format." };
     }
