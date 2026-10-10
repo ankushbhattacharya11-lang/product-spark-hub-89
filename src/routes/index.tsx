@@ -100,6 +100,18 @@ function Header() {
           >
             About
           </a>
+          <Link
+            to="/league"
+            className="hidden text-muted-foreground transition-colors hover:text-foreground sm:inline-block"
+          >
+            Live League
+          </Link>
+          <Link
+            to="/process/baba-champion-league"
+            className="hidden text-muted-foreground transition-colors hover:text-foreground md:inline-block"
+          >
+            Process
+          </Link>
           <a
             href="#contact"
             className="hidden text-muted-foreground transition-colors hover:text-foreground sm:inline-block"
